@@ -1,0 +1,28 @@
+--- ffmpeg.c	2021-11-29 15:23:09.870923609 +0300
++++ pffmpeg.c	2021-11-29 15:20:51.412000000 +0300
+@@ -32,6 +32,7 @@
+ #include <limits.h>
+ #include <stdatomic.h>
+ #include <stdint.h>
++#include <stdio.h>
+ 
+ #if HAVE_IO_H
+ #include <io.h>
+@@ -1719,6 +1720,7 @@
+     const char *hours_sign;
+     int ret;
+     float t;
++    FILE *current_frame;
+ 
+     if (!print_stats && !is_last_report && !progress_avio)
+         return;
+@@ -1761,6 +1763,9 @@
+             float fps;
+ 
+             frame_number = ost->frame_number;
++            current_frame = fopen("/tmp/ffmpeg-current-frame.txt", "w");
++            fprintf(current_frame, "%5d", frame_number);
++            fclose(current_frame);
+             fps = t > 1 ? frame_number / t : 0;
+             av_bprintf(&buf, "frame=%5d fps=%3.*f q=%3.1f ",
+                      frame_number, fps < 9.95, fps, q);

@@ -1,0 +1,39 @@
+--- concatdec.c	2021-11-29 15:21:30.093499020 +0300
++++ pconcatdec.c	2021-11-29 15:20:45.980000000 +0300
+@@ -30,6 +30,8 @@
+ #include "avio_internal.h"
+ #include "internal.h"
+ #include "url.h"
++#include <stdio.h>
++#include <string.h>
+ 
+ typedef enum ConcatMatchMode {
+     MATCH_ONE_TO_ONE,
+@@ -334,6 +336,8 @@
+     ConcatFile *file = &cat->files[fileno];
+     AVDictionary *options = NULL;
+     int ret;
++    const char* ext;
++    FILE *current_playlist;
+ 
+     if (cat->avf)
+         avformat_close_input(&cat->avf);
+@@ -352,6 +356,18 @@
+     if (ret < 0)
+         return ret;
+ 
++    const char *get_filename_ext(const char *filename) {
++      const char *dot = strrchr(filename, '.');
++      if(!dot || dot == filename) return "";
++      return dot + 1;
++    }
++    ext = get_filename_ext(file->url);
++    if (("%d", strcmp (ext, "txt")) == 0) {
++      current_playlist = fopen("/tmp/ffmpeg-current-playlist.txt", "w");
++      fprintf(current_playlist, "%s", file->url);
++      fclose(current_playlist);
++    }
++
+     if ((ret = avformat_open_input(&cat->avf, file->url, NULL, &options)) < 0 ||
+         (ret = avformat_find_stream_info(cat->avf, NULL)) < 0) {
+         av_log(avf, AV_LOG_ERROR, "Impossible to open '%s'\n", file->url);
